@@ -1,0 +1,29 @@
+<resources>
+    <string name="app_name">Expense Tracker by AN Cloud</string>
+    <string name="app_subtitle">Smart Expense Intelligence</string>
+    <string name="sign_in_headline">Track every expense with clarity</string>
+    <string name="sign_in_body">Interactive cashflow insights, category budgets, and multi-currency tracking synced securely across your devices.</string>
+    <string name="sign_in_with_google">Sign in with Google</string>
+    <string name="sign_out">Sign out</string>
+    <string name="tab_overview">Overview</string>
+    <string name="tab_activity">Activity</string>
+    <string name="tab_analytics">Analytics</string>
+    <string name="tab_budgets">Budgets</string>
+    <string name="add_transaction">Add Transaction</string>
+    <string name="edit_transaction">Edit Transaction</string>
+    <string name="new_transaction">New Transaction</string>
+    <string name="save_transaction">Save Transaction</string>
+    <string name="net_balance">Net Balance</string>
+    <string name="income_label">Income</string>
+    <string name="expenses_label">Expenses</string>
+    <string name="cashflow_trend">Cashflow Trend</string>
+    <string name="spending_by_category">Spending by Category</string>
+    <string name="monthly_budgets">Monthly Category Budgets</string>
+    <string name="transactions_title">Transactions</string>
+    <string name="export_csv">Export CSV</string>
+    <string name="toggle_theme">Toggle theme</string>
+    <string name="empty_transactions">No transactions for this period yet.</string>
+    <string name="empty_cashflow">Add transactions to visualize cashflow trends.</string>
+    <string name="empty_donut">No expense data for this period yet.</string>
+    <string name="apply_suggested_budgets">Apply Suggested Budgets</string>
+</resources>

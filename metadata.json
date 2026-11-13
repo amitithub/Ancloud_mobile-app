@@ -1,0 +1,6 @@
+{
+  "name": "Expense Tracker by AN Cloud",
+  "description": "Smart expense tracker with cloud sync, interactive cashflow and category charts, monthly budgets, and CSV export.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,114 @@
+{
+  "entities": {
+    "Transaction": {
+      "title": "Transaction",
+      "description": "A user income or expense record.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "UID of the authenticated owner."
+        },
+        "title": {
+          "type": "string",
+          "description": "Short title or merchant name (1-100 chars)."
+        },
+        "amount": {
+          "type": "number",
+          "description": "Positive monetary amount rounded to 2 decimals."
+        },
+        "type": {
+          "type": "string",
+          "enum": ["expense", "income"],
+          "description": "Transaction direction."
+        },
+        "category": {
+          "type": "string",
+          "enum": [
+            "food",
+            "housing",
+            "transport",
+            "utilities",
+            "shopping",
+            "entertainment",
+            "health",
+            "salary",
+            "freelance",
+            "other"
+          ],
+          "description": "Category identifier."
+        },
+        "date": {
+          "type": "string",
+          "format": "date",
+          "description": "ISO date YYYY-MM-DD."
+        },
+        "note": {
+          "type": "string",
+          "description": "Optional note up to 250 chars."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp set via FieldValue.serverTimestamp()."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp updated via FieldValue.serverTimestamp()."
+        }
+      },
+      "required": ["userId", "title", "amount", "type", "category", "date", "createdAt", "updatedAt"]
+    },
+    "CategoryBudget": {
+      "title": "CategoryBudget",
+      "description": "Monthly spending limit for an expense category.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "UID of the authenticated owner."
+        },
+        "category": {
+          "type": "string",
+          "enum": [
+            "food",
+            "housing",
+            "transport",
+            "utilities",
+            "shopping",
+            "entertainment",
+            "health",
+            "other"
+          ],
+          "description": "Expense category identifier."
+        },
+        "limit": {
+          "type": "number",
+          "description": "Non-negative monthly budget limit."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp set via FieldValue.serverTimestamp()."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp updated via FieldValue.serverTimestamp()."
+        }
+      },
+      "required": ["userId", "category", "limit", "createdAt", "updatedAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}/transactions/{transactionId}": {
+      "schema": { "$ref": "#/entities/Transaction" },
+      "description": "User-owned income and expense transactions."
+    },
+    "/users/{userId}/budgets/{categoryId}": {
+      "schema": { "$ref": "#/entities/CategoryBudget" },
+      "description": "User-owned monthly budget limits keyed by categoryId."
+    }
+  }
+}

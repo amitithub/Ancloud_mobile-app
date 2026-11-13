@@ -1,0 +1,132 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global safety net: deny everything by default
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidCategory(cat) {
+      return cat in [
+        'food',
+        'housing',
+        'transport',
+        'utilities',
+        'shopping',
+        'entertainment',
+        'health',
+        'salary',
+        'freelance',
+        'other'
+      ];
+    }
+
+    function isValidExpenseCategory(cat) {
+      return cat in [
+        'food',
+        'housing',
+        'transport',
+        'utilities',
+        'shopping',
+        'entertainment',
+        'health',
+        'other'
+      ];
+    }
+
+    function isValidTransaction(data) {
+      return data.userId is string && data.userId.size() >= 1 && data.userId.size() <= 128 &&
+             data.title is string && data.title.size() >= 1 && data.title.size() <= 100 &&
+             (data.amount is int || data.amount is float) && data.amount > 0 && data.amount <= 100000000 &&
+             data.type in ['expense', 'income'] &&
+             isValidCategory(data.category) &&
+             data.date is string && data.date.size() == 10 && data.date.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$') &&
+             (!('note' in data) || (data.note is string && data.note.size() <= 250));
+    }
+
+    function isValidBudget(data) {
+      return data.userId is string && data.userId.size() >= 1 && data.userId.size() <= 128 &&
+             isValidExpenseCategory(data.category) &&
+             (data.limit is int || data.limit is float) && data.limit >= 0 && data.limit <= 100000000;
+    }
+
+    match /users/{userId}/transactions/{transactionId} {
+      allow get: if isOwner(userId) && isValidId(transactionId);
+      allow list: if isOwner(userId);
+
+      allow create: if isOwner(userId) &&
+                       isValidId(transactionId) &&
+                       incoming().userId == request.auth.uid &&
+                       incoming().keys().hasAll(['userId', 'title', 'amount', 'type', 'category', 'date', 'createdAt', 'updatedAt']) &&
+                       incoming().keys().hasOnly(['userId', 'title', 'amount', 'type', 'category', 'date', 'note', 'createdAt', 'updatedAt']) &&
+                       incoming().createdAt is timestamp &&
+                       incoming().createdAt <= request.time &&
+                       incoming().updatedAt is timestamp &&
+                       incoming().updatedAt <= request.time &&
+                       isValidTransaction(incoming());
+
+      allow update: if isOwner(userId) &&
+                       isValidId(transactionId) &&
+                       isValidTransaction(incoming()) &&
+                       incoming().userId == existing().userId &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().updatedAt is timestamp &&
+                       incoming().updatedAt <= request.time &&
+                       incoming().diff(existing()).affectedKeys().hasOnly(['title', 'amount', 'type', 'category', 'date', 'note', 'updatedAt']);
+
+      allow delete: if isOwner(userId) && isValidId(transactionId);
+    }
+
+    match /users/{userId}/budgets/{categoryId} {
+      allow get: if isOwner(userId) && isValidId(categoryId) && isValidExpenseCategory(categoryId);
+      allow list: if isOwner(userId);
+
+      allow create: if isOwner(userId) &&
+                       isValidId(categoryId) &&
+                       isValidExpenseCategory(categoryId) &&
+                       incoming().userId == request.auth.uid &&
+                       incoming().category == categoryId &&
+                       incoming().keys().hasAll(['userId', 'category', 'limit', 'createdAt', 'updatedAt']) &&
+                       incoming().keys().hasOnly(['userId', 'category', 'limit', 'createdAt', 'updatedAt']) &&
+                       incoming().createdAt is timestamp &&
+                       incoming().createdAt <= request.time &&
+                       incoming().updatedAt is timestamp &&
+                       incoming().updatedAt <= request.time &&
+                       isValidBudget(incoming());
+
+      allow update: if isOwner(userId) &&
+                       isValidId(categoryId) &&
+                       isValidExpenseCategory(categoryId) &&
+                       isValidBudget(incoming()) &&
+                       incoming().userId == existing().userId &&
+                       incoming().category == existing().category &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().updatedAt is timestamp &&
+                       incoming().updatedAt <= request.time &&
+                       incoming().diff(existing()).affectedKeys().hasOnly(['limit', 'updatedAt']);
+
+      allow delete: if isOwner(userId) && isValidId(categoryId);
+    }
+  }
+}
